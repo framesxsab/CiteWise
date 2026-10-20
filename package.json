@@ -1,0 +1,11 @@
+{
+  "private": true,
+  "scripts": {
+    "test:e2e": "playwright test",
+    "test:a11y": "playwright test tests/browser/citewise.spec.js --grep axe --reporter=line"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "@playwright/test": "1.63.0"
+  }
+}

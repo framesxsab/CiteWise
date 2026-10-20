@@ -1,0 +1,210 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><title>CiteWise Final Report</title>
+<style>
+@page { size: Letter; margin: 0; }
+* { box-sizing: border-box; }
+html,body { margin:0;padding:0;color:#17212b;font:9pt/1.31 Georgia,"Times New Roman",serif; }
+.page { width:8.5in;height:11in;padding:.55in .62in;overflow:hidden;page-break-after:always; }
+.page:last-child { page-break-after:auto; }
+h1 { font-size:19pt;line-height:1.15;margin:0 0 12pt;color:#142b3a; }
+h2 { font-size:14pt;line-height:1.18;margin:0 0 10pt;color:#142b3a; }
+h3 { font-size:10pt;margin:8pt 0 3pt; }
+p { margin:0 0 7pt; } ul,ol { margin:0 0 8pt;padding-left:20pt; } li { margin:0 0 3pt; }
+table { border-collapse:collapse;width:100%;margin:7pt 0 9pt;font:7.5pt/1.2 Arial,sans-serif; }
+th,td { border-bottom:1px solid #aab6bf;padding:4px 5px;text-align:left;vertical-align:top; }
+th { border-top:1.5px solid #48606e;background:#f1f4f5; }
+code { font:7.7pt Consolas,monospace;overflow-wrap:anywhere; }
+img { max-width:100%;max-height:3.1in;object-fit:contain; } figure { margin:5pt 0; }
+figcaption { font:7.5pt/1.2 Arial,sans-serif;margin-top:3pt; }
+.screenshot-pair { display:flex;gap:12pt;align-items:flex-start; }
+.screenshot-pair figure { width:50%; } .screenshot-pair img { max-height:3.8in; }
+a { color:#174c68;text-decoration:none; }
+</style></head><body><section class="page"><h1>CiteWise: Evidence Retrieval in Scientific Papers</h1>
+<p><strong>Final evaluation and mini-project report</strong><br>
+QASPER official splits | Paragraph-level retrieval | 20 October 2026</p>
+<h1>1. Introduction</h1>
+<p>Researchers looking for evidence in a paper must find passages that support a question, often across long sections of technical text. CiteWise addresses this retrieval step: a user selects a real QASPER paper, asks a question, and receives ranked paragraph candidates with section headings and stable evidence IDs. It does not generate answers or certify scientific truth.</p>
+<p>The study asks: <em>How do lexical retrieval, a QASPER-trained lexical ranker, and pretrained sentence encoders differ in paragraph evidence ranking, measured latency, and practical deployment cost?</em> Its contribution is a controlled comparison on original paper-level splits, a documented failure of hard-negative logistic training, a reproducible measurement pipeline, and a browser application that presents passages from the source paper.</p>
+<p>The final comparison contains four retrieval methods: BM25, supervised logistic, MiniLM, and BGE-base. Only MiniLM and BGE-base are neural retrievers. E5-base-v2 and GTE-base were configured as fallbacks but could not be downloaded in the execution environment; BGE-M3 and Qwen3 were not run. Therefore this report does <strong>not</strong> claim four state-of-the-art neural evaluations. If the faculty requires four neural models, that criterion remains unmet.</p>
+<p>The test split was held out for selection, the methodology and model list were frozen, and the four-method test evaluation was run once. Its result is an estimate for this benchmark sample, not evidence that a retriever answers questions correctly without inspecting its cited passage. CiteWise remains a local application; no public deployment or human accessibility evaluation is claimed.</p>
+</section>
+<section class="page"><h1>2. Literature Review</h1>
+<p>QASPER frames information seeking around a particular research paper. Dasigi et al. collected questions from readers who saw a paper title and abstract, then gathered answers and supporting evidence from full text [1]. This provides human evidence paragraphs for retrieval evaluation. CiteWise uses the paper-local setting and mapped textual evidence, while excluding unanswerable and unmatched questions from ranking metrics.</p>
+<p>Chen et al.'s M3-Embedding combines dense, sparse, and multi-vector retrieval and supports multilingual inputs and long documents [2]. Its multi-function training is relevant to retrieval versatility, but CiteWise neither uses nor reproduces M3-Embedding. BGE-M3 was an intended model comparison and has no measured CiteWise score.</p>
+<p>Saad-Falcon et al.'s ARES evaluates retrieval-augmented generation along context relevance, answer faithfulness, and answer relevance, using trained language-model judges and a small human-labeled set for prediction-powered inference [3]. CiteWise instead evaluates paragraph ranking against QASPER annotations. ARES motivates keeping retrieval quality distinct from generated-answer quality; CiteWise does not claim answer-faithfulness metrics.</p>
+<p>Zhang et al.'s Qwen3 Embedding preprint describes embedding and reranking checkpoints at multiple scales, trained with large-scale pretraining and supervised fine-tuning [4]. It motivates comparing quality with resource cost. Qwen3-Embedding-0.6B was not downloaded or evaluated here, so no published benchmark number is attributed to CiteWise.</p>
+</section>
+<section class="page"><h1>2. Literature Review (continued)</h1>
+<p>Wang et al.'s Astute RAG studies imperfect retrieved context and conflicts between parametric and retrieved knowledge, then proposes a source-aware generation process [5]. CiteWise shares the concern that a plausible passage can still be misleading, but stops at ranking and displays source text for inspection. It does not implement Astute RAG's generation or conflict-resolution pipeline.</p>
+<p>Liu and Zhang's Exp4Fuse applies LLM-based query expansion to sparse retrieval, forms rankings for original and expanded queries, and fuses the lists [6]. This supports studying rank fusion as a future extension. CiteWise compares the current retrievers without query expansion and makes no Exp4Fuse implementation or performance claim.</p>
+<p>Asai et al.'s OpenScholar indexes a large scholarly corpus and synthesizes citation-backed responses to multi-paper scientific questions [7]. It demonstrates the broader research-synthesis setting. CiteWise is narrower: retrieval is constrained to one paper and evaluated against annotated paragraphs.</p>
+<p>Together these works distinguish model quality from system scope. A dense encoder, a fusion method, an evaluator for generated answers, and a literature-synthesis system are not interchangeable comparisons. CiteWise's contribution is an engineering study of within-paper paragraph ranking. Its strongest experimentally supported finding is a quality/latency trade-off between BGE-base and MiniLM, not a reproduction of published leaderboard scores. The original four-neural-model ambition remains incomplete rather than being conflated with the four-method comparison.</p>
+</section>
+<section class="page"><h1>3. Methodology</h1>
+<p><strong>Architecture.</strong> A QASPER paper is loaded with original paragraph IDs, section names, and annotations. The user selects a paper and question. A chosen retriever scores every original paragraph in that paper; the API returns ranked passage IDs, text, headings, scores, and latency. The UI labels results as evidence candidates, not verified answers.</p>
+<p><strong>Data discipline.</strong> The logistic classifier was fitted on train papers only with balanced logistic regression (<code>max_iter=1500</code>, <code>random_state=42</code>). Model and protocol decisions used validation. The Phase 5 freeze retained the four existing methods and did not add E5/GTE because their pinned weights were unavailable. No model or threshold was selected from test outcomes.</p>
+<p><strong>Encoders.</strong> MiniLM uses plain text, attention-masked mean pooling, 256-token truncation, and normalized float32 embeddings. BGE-base uses the documented short-query instruction <code>Represent this sentence for searching relevant passages: </code>, plain passages, CLS pooling, 512-token truncation, and normalized float32 embeddings. Pinned snapshot revisions and the validation-worker package manifest are recorded in the freeze/benchmark evidence. Neural encoders remained pretrained; only the logistic ranker was fit on QASPER.</p>
+<p><strong>Metrics.</strong> For a query gold set G and top-k results R, Recall@k = |G intersect R| / |G|. MRR@k is 1/r for the first relevant rank r, or zero if none occurs in the top k. Binary nDCG@k is DCG@k / IDCG@k, where each relevant result contributes 1/log2(i+1) at one-based rank i. Scores are macro-averaged over scorable questions. Uncertainty intervals resample papers as clusters, keeping each paper's questions together; 2,000 replicates use seed 42. Paired intervals use identical question IDs.</p>
+</section>
+<section class="page"><h1>4. Data Cleaning and Preprocessing</h1>
+<p>The source is Allen Institute's QASPER dataset, revision <code>91bc63e221475d59a6e17e4299fbfc5a919d7c7a</code>, distributed under CC BY 4.0 [1]. The official paper-level partitions are retained; no random paragraph split or cross-split resampling was performed. The prepared data audit records:</p>
+<table>
+<thead>
+<tr>
+<th>Official split</th>
+<th style="text-align:right">Papers</th>
+<th style="text-align:right">Non-empty paragraphs</th>
+<th style="text-align:right">Questions</th>
+<th style="text-align:right">Scorable</th>
+<th style="text-align:right">Unmatched/no text</th>
+<th style="text-align:right">Unanswerable</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Train</td>
+<td style="text-align:right">888</td>
+<td style="text-align:right">46,882</td>
+<td style="text-align:right">2,593</td>
+<td style="text-align:right">2,098</td>
+<td style="text-align:right">224</td>
+<td style="text-align:right">271</td>
+</tr>
+<tr>
+<td>Validation</td>
+<td style="text-align:right">281</td>
+<td style="text-align:right">13,266</td>
+<td style="text-align:right">1,005</td>
+<td style="text-align:right">888</td>
+<td style="text-align:right">57</td>
+<td style="text-align:right">60</td>
+</tr>
+<tr>
+<td>Test</td>
+<td style="text-align:right">416</td>
+<td style="text-align:right">19,817</td>
+<td style="text-align:right">1,451</td>
+<td style="text-align:right">1,309</td>
+<td style="text-align:right">63</td>
+<td style="text-align:right">79</td>
+</tr>
+</tbody>
+</table>
+<p>Preparation strips empty paragraphs and collapses whitespace. Evidence phrases are whitespace-normalized and case-folded before mapping to stable IDs tied to original section/paragraph positions. Repeated identical paragraph text can map to multiple IDs. Figure/table-only annotations are counted as unsupported textual evidence rather than converted into fabricated paragraphs: 386 items in train, 253 in validation, and 459 in test.</p>
+<p>A question is scorable if at least one annotated textual evidence phrase maps to a paragraph. Unanswerable questions and questions without mapped text evidence are excluded consistently for every method and reported as coverage exclusions. The final test run evaluated all 1,309 scorable questions across 408 papers; its 63 unmatched/no-text and 79 unanswerable questions were excluded. The final test questions were not used for training or model selection.</p>
+</section>
+<section class="page"><h1>5. Results and Discussion</h1>
+<p>The frozen four-method comparison was evaluated once on all 1,309 scorable QASPER test questions. Table intervals are percentile 95% paper-cluster bootstrap intervals (408 clusters, 2,000 replicates, seed 42). Paired intervals use the same paper resamples across methods.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th style="text-align:right">Recall@5 [95% CI]</th>
+<th style="text-align:right">MRR@5 [95% CI]</th>
+<th style="text-align:right">nDCG@5 [95% CI]</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>BM25</td>
+<td style="text-align:right">43.77% [41.38, 46.24]</td>
+<td style="text-align:right">37.92% [35.63, 40.19]</td>
+<td style="text-align:right">34.57% [32.61, 36.58]</td>
+</tr>
+<tr>
+<td>Supervised logistic</td>
+<td style="text-align:right">5.50% [4.53, 6.60]</td>
+<td style="text-align:right">6.66% [5.54, 7.91]</td>
+<td style="text-align:right">4.87% [4.03, 5.85]</td>
+</tr>
+<tr>
+<td>MiniLM</td>
+<td style="text-align:right">47.36% [44.92, 49.87]</td>
+<td style="text-align:right">43.70% [41.34, 46.07]</td>
+<td style="text-align:right">38.77% [36.66, 40.90]</td>
+</tr>
+<tr>
+<td>BGE-base</td>
+<td style="text-align:right">52.35% [49.84, 54.86]</td>
+<td style="text-align:right">49.97% [47.45, 52.30]</td>
+<td style="text-align:right">44.32% [42.18, 46.47]</td>
+</tr>
+</tbody>
+</table>
+<p><img src="assets/test-recall.png" alt="Test Recall@5 with paper-cluster confidence intervals"></p>
+<p><strong>Figure 1.</strong> Test Recall@5 with paper-cluster 95% intervals; generated from the frozen evaluation output. BGE-base leads the tested methods on all three ranking measures. Relative to MiniLM, its point gain is 4.99 percentage points in Recall@5, 6.27 in MRR@5, and 5.55 in nDCG@5. The test comparison is consistent with the validation-selected quality-first model; it was not used to retune the system.</p>
+</section>
+<section class="page"><h1>5. Results and Discussion (continued)</h1>
+<p>Paired BGE-base minus MiniLM improvements were +4.99 percentage points in Recall@5 [95% CI 2.88, 7.08], +6.27 in MRR@5 [4.44, 8.17], and +5.55 in nDCG@5 [3.95, 7.17]. Paired BGE-base minus BM25 improvements were +8.57 [5.93, 11.12], +12.05 [9.48, 14.81], and +9.75 [7.62, 12.05]. All six intervals exclude zero. They are descriptive test uncertainty intervals and are not adjusted for multiple comparisons.</p>
+<p><img src="assets/test-paired.png" alt="Paired test metric differences and paper-cluster confidence intervals"></p>
+<p><strong>Figure 2.</strong> Paired test differences (model A minus model B). The bootstrap resamples papers and preserves the paired query rows.</p>
+<p>The unchanged logistic ranker remains a negative result. Its training sampler retained positives and selected only the highest-BM25 hard negatives, yielding a 22.3% positive-pair share; selected negatives had higher mean BM25 than positives (5.04 versus 3.33). On full validation candidates the direction reversed (positive mean 3.06, non-relevant mean 1.70). The classifier then ranked every paragraph at inference. Standardization and a bounded BM25-shortlist reranker did not justify replacing the baseline. This supports a candidate-distribution-mismatch explanation but does not prove it is the sole cause.</p>
+<p>Validation failure review identified lexical/semantic disagreements and long-passage truncation risks. MiniLM's 256-token cap flagged 144 gold paragraphs above its limit; BGE-base's 512-token cap flagged 13. These flags cannot locate the exact answer span, because QASPER annotates paragraphs rather than token spans. Unsupported figure/table and unanswerable evidence remain outside text-ranking scores.</p>
+</section>
+<section class="page"><h1>6. State-of-the-Art Models Comparison</h1>
+<p>The four evaluated entries are different classes of retrieval approach, not four neural state-of-the-art models.</p>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Class</th>
+<th style="text-align:right">Test Recall@5</th>
+<th style="text-align:right">Test nDCG@5</th>
+<th>Role and limitation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>BM25</td>
+<td>Classical lexical retrieval</td>
+<td style="text-align:right">43.77%</td>
+<td style="text-align:right">34.57%</td>
+<td>Fast baseline; relies on term overlap</td>
+</tr>
+<tr>
+<td>Supervised logistic</td>
+<td>Train-fitted lexical ranker</td>
+<td style="text-align:right">5.50%</td>
+<td style="text-align:right">4.87%</td>
+<td>Retained negative result; hard-negative mismatch</td>
+</tr>
+<tr>
+<td>MiniLM-L6-v2</td>
+<td>Pretrained neural encoder</td>
+<td style="text-align:right">47.36%</td>
+<td style="text-align:right">38.77%</td>
+<td>Faster neural option; shorter input limit</td>
+</tr>
+<tr>
+<td>BGE-base-en-v1.5</td>
+<td>Pretrained neural encoder</td>
+<td style="text-align:right">52.35%</td>
+<td style="text-align:right">44.32%</td>
+<td>Highest measured retrieval quality; higher CPU setup/encoding cost</td>
+</tr>
+</tbody>
+</table>
+<p><img src="assets/validation-recall.png" alt="Validation Recall@5 by retrieval method"></p>
+<p><strong>Figure 3.</strong> Validation Recall@5 with paper-cluster intervals. Model selection used this validation comparison, not the test results.</p>
+<p>Only MiniLM and BGE-base count as neural retrievers. E5-base-v2 and GTE-base have configured preprocessing and pinned MIT snapshots, but neither checkpoint could be fetched and neither was evaluated. BGE-M3 and Qwen3 were not downloaded or initialized. Their published scores are not CiteWise results. If the faculty rubric strictly requires four evaluated neural or state-of-the-art models, this requirement remains unmet.</p>
+<p>BGE-base is the selected quality-first demo model; MiniLM is the lower-latency alternative. Validation warm P50 was 92.48 ms for BGE-base and 20.07 ms for MiniLM. Final-test P50/P95 were 110.37/12,887.97 ms and 25.98/1,684.73 ms, respectively. The legacy test timer includes lazy model initialization and per-paper embedding, so these observed percentiles are not steady-state service latency.</p>
+</section>
+<section class="page"><h1>7. User Interface Development and Deployment</h1>
+<p>CiteWise uses FastAPI and a browser interface over real QASPER papers. The user selects a paper, loads its annotated questions, enters a question, chooses a retriever, and sees ranked passages with section, passage ID, and score. Results are evidence candidates rather than generated answers.</p>
+<div class="screenshot-pair">
+<figure><img src="assets/evidence-desktop.png" alt="Local desktop CiteWise showing a selected validation paper, question and five BM25 evidence passages"><figcaption>Figure 4. Desktop local search over a real validation paper. The browser test matched displayed evidence IDs and text against the API response.</figcaption></figure>
+<figure><img src="assets/mobile-390-evidence.png" alt="Local mobile CiteWise evidence view at 390 CSS pixels"><figcaption>Figure 5. Evidence view at 390 CSS pixels. 375px and 390px automated runs found no horizontal overflow.</figcaption></figure>
+</div>
+<p>Playwright passed six local browser tests covering BM25 and BGE-base evidence/API parity, paper metadata, loading feedback, invalid requests, visible keyboard focus, desktop layout, and mobile flow at 375px/390px. A standalone axe scan reported zero WCAG 2.1 A/AA violations. These are automated checks, not manual screen-reader, assistive-technology, or human usability results.</p>
+<p>The Dockerfile stages pinned model assets at image build, disables Hub downloads at runtime, uses one non-root Uvicorn worker, reads configuration from environment variables, and defines <code>/api/health</code>. The image was not built because the Docker Engine is unavailable at the named pipe. No hosting account or public HTTPS endpoint was verified. Local browser tests are not public-deployment evidence.</p>
+<p><strong>Conclusion.</strong> BGE-base produced the highest retrieval scores among the measured methods on validation and the one-time held-out evaluation. The logistic ranker remains a meaningful failure analysis; MiniLM remains the faster neural alternative. CiteWise has an evidence-backed local demo and reproducible study, but public hosting and a four-neural-model comparison remain unverified.</p>
+</section>
+<section class="page"><h1>8. References</h1>
+<p>[1] P. Dasigi, K. Lo, I. Beltagy, A. Cohan, N. A. Smith, and M. Gardner. &quot;A Dataset of Information-Seeking Questions and Answers Anchored in Research Papers.&quot; <em>Proceedings of NAACL-HLT</em>, 2021, pp. 4599-4610. https://aclanthology.org/2021.naacl-main.365/</p>
+<p>[2] J. Chen et al. &quot;M3-Embedding: Multi-Linguality, Multi-Functionality, Multi-Granularity Text Embeddings Through Self-Knowledge Distillation.&quot; <em>Findings of ACL</em>, 2024, pp. 2318-2335. https://aclanthology.org/2024.findings-acl.137/</p>
+<p>[3] J. Saad-Falcon, O. Khattab, C. Potts, and M. Zaharia. &quot;ARES: An Automated Evaluation Framework for Retrieval-Augmented Generation Systems.&quot; <em>NAACL-HLT</em>, 2024, pp. 338-354. https://aclanthology.org/2024.naacl-long.20/</p>
+<p>[4] Y. Zhang et al. &quot;Qwen3 Embedding: Advancing Text Embedding and Reranking Through Foundation Models.&quot; arXiv:2506.05176, 2025. https://arxiv.org/abs/2506.05176</p>
+<p>[5] F. Wang et al. &quot;Astute RAG: Overcoming Imperfect Retrieval Augmentation and Knowledge Conflicts for Large Language Models.&quot; <em>ACL</em>, 2025, pp. 30553-30571. https://aclanthology.org/2025.acl-long.1476/</p>
+<p>[6] L. Liu and M. Zhang. &quot;Exp4Fuse: A Rank Fusion Framework for Enhanced Sparse Retrieval using Large Language Model-based Query Expansion.&quot; <em>Findings of ACL</em>, 2025, pp. 163-173. https://aclanthology.org/2025.findings-acl.9/</p>
+<p>[7] A. Asai et al. &quot;Synthesizing scientific literature with retrieval-augmented language models.&quot; <em>Nature</em> 650, 857-863 (2026). https://doi.org/10.1038/s41586-025-10072-4</p>
+<p><strong>Data and model cards.</strong> QASPER dataset card: https://huggingface.co/datasets/allenai/qasper. MiniLM: https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2. BGE-base-en-v1.5: https://huggingface.co/BAAI/bge-base-en-v1.5. E5/GTE cards and licenses are listed in <code>docs/LICENSING.md</code>; those fallbacks were not evaluated.</p>
+</section></body></html>

@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CiteWise | Evidence-first scientific retrieval</title>
+<style>
+:root { color-scheme:light; font-family:Inter, ui-sans-serif, system-ui, Arial, sans-serif; background:#faf9f5; color:#20302d; }
+* { box-sizing:border-box; } body { margin:0; } main { max-width:1050px; margin:auto; padding:28px 20px 70px; }
+header { border-bottom:1px solid #dbe2dc; padding-bottom:19px; margin-bottom:25px; }
+small, .muted { color:#5f7169; } h1 { font-size:2.15rem; letter-spacing:-.05em; margin:5px 0; }
+h2 { font-size:1.1rem; margin:0 0 14px; } p { line-height:1.55; }
+label { display:block; margin:0 0 6px; font-weight:600; font-size:.86rem; }
+select, textarea { width:100%; background:#fff; color:inherit; border:1px solid #b7c8bf; border-radius:9px; padding:11px 12px; font:inherit; }
+textarea { resize:vertical; min-height:84px; } select:focus-visible, textarea:focus-visible, button:focus-visible { outline:3px solid #79ae9f; outline-offset:2px; }
+.controls { display:grid; grid-template-columns:1fr 1fr; gap:16px; } .wide { grid-column:1/-1; }
+section { margin:0 0 24px; } button { border:0; border-radius:9px; padding:12px 22px; background:#1d6657; color:white; font-weight:700; cursor:pointer; }
+button[disabled] { opacity:.4; cursor:not-allowed; } .evidence { background:white; padding:17px 20px; border:1px solid #dfebe3; border-radius:12px; margin:12px 0; }
+.evidence h3 { margin:0; font-size:.96rem; } .evidence p { margin:10px 0; } .meta { font-size:.81rem; color:#63786e; }
+#status { padding:14px 0; color:#425d53; min-height:42px; } #status.error { color:#9b2226; } .key { font-size:.76rem; letter-spacing:.12em; text-transform:uppercase; font-weight:700; color:#34786a; }
+@media (max-width:650px) { .controls { grid-template-columns:1fr; } .wide { grid-column:auto; } main { padding:18px 14px 55px; } h1 { font-size:1.9rem; } }
+</style>
+</head>
+<body><main>
+<header><small class="key">Evidence-grounded scientific reading</small><h1>CiteWise</h1><p class="muted">Ask a question about a real research paper. Compare what different retrieval models find in its text.</p></header>
+<section aria-label="Research paper search" id="search-controls" aria-busy="false">
+<div class="controls"><div><label for="split">Dataset split</label><select id="split"><option value="validation">Validation</option><option value="train">Training</option><option value="test">Test</option></select></div>
+<div><label for="model">Retriever</label><select id="model"><option value="bm25">BM25 · lexical baseline</option><option value="supervised-logistic">Trained lexical ranker · supervised baseline</option><option value="minilm">MiniLM · semantic</option><option value="bge-base">BGE-base · instructed semantic retrieval</option><option value="bge-m3">BGE-M3 · optional, cached weights required</option><option value="qwen3-0.6b">Qwen3-Embedding-0.6B · optional, cached weights required</option><option value="e5-base-v2">E5-base-v2 · CPU alternative, cached weights required</option><option value="gte-base">GTE-base · CPU alternative, cached weights required</option></select></div>
+<div class="wide"><label for="paper">Scientific paper</label><select id="paper"><option value="">Loading actual papers…</option></select></div>
+<div class="wide"><label for="sample">Annotated question (optional)</label><select id="sample"><option value="">Use my own question</option></select></div>
+<div class="wide"><label for="question">Question</label><textarea id="question" maxlength="2000" placeholder="Ask something about the selected paper"></textarea></div></div>
+<p><button id="run" disabled>Retrieve evidence</button></p><p id="status" role="status" aria-live="polite"></p></section>
+<section aria-labelledby="evidence-title"><h2 id="evidence-title">Retrieved evidence</h2><div id="results"><p class="muted">Search results from the selected paper appear here, with section names and retrieval scores.</p></div></section>
+</main><script>
+const $ = (id) => document.getElementById(id);
+const status = (text) => $('status').textContent = text;
+const clearResults = (message='Choose a paper and enter a question to see evidence candidates.') => { const p=document.createElement('p'); p.className='muted'; p.textContent=message; $('results').replaceChildren(p); };
+async function api(url, options) { const res = await fetch(url, options); const obj = await res.json(); if(!res.ok) throw Error(obj.detail || 'Request failed'); return obj; }
+function fillSelect(node, options, emptyText) { node.replaceChildren(); if(emptyText) node.add(new Option(emptyText, '')); for(const [label, value] of options) node.add(new Option(label, value)); }
+async function loadPapers(){ $('run').disabled=true; clearResults(); $('status').classList.remove('error'); status('Loading papers…'); try { const papers=await api('/api/papers?split='+encodeURIComponent($('split').value)); fillSelect($('paper'), papers.map(p=>[p.title || p.id,p.id]), 'Choose a research paper'); fillSelect($('sample'),[], 'Use my own question'); $('question').value=''; status(`${papers.length} real papers loaded from the ${$('split').value} split.`); } catch(e){fillSelect($('paper'),[], 'No dataset available'); status('Dataset setup required: '+e.message); $('status').classList.add('error');} }
+async function loadQuestions(){const id=$('paper').value; $('run').disabled=true; clearResults(); fillSelect($('sample'),[], 'Use my own question'); $('question').value=''; $('status').classList.remove('error'); if(!id) return; status('Loading annotated questions…'); try { const rows=await api('/api/questions/'+encodeURIComponent(id)+'?split='+encodeURIComponent($('split').value)); if($('paper').value!==id) return; fillSelect($('sample'),rows.map(q=>[q.text,q.text]), 'Use my own question'); status(''); } catch(e) { status('Could not load annotated questions: '+e.message); $('status').classList.add('error'); } finally { $('run').disabled=!$('paper').value; }}
+$('split').addEventListener('change',loadPapers); $('paper').addEventListener('change',loadQuestions);
+$('sample').addEventListener('change', () => { if($('sample').value) $('question').value=$('sample').value; });
+$('run').addEventListener('click', async ()=>{
+ const q=$('question').value.trim();
+ if(q.length<3){clearResults(); status('Enter a question with at least three characters.'); $('status').classList.add('error'); return;}
+ const root=$('results'); clearResults('Retrieving evidence candidates…'); $('status').classList.remove('error');
+ const controls=['split','model','paper','sample','question','run']; controls.forEach(id=>$(id).disabled=true); $('search-controls').setAttribute('aria-busy','true');
+ status('Retrieving evidence. The first neural search also prepares the selected paper; please wait.');
+ try {
+  const data=await api('/api/search',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({split:$('split').value,paper_id:$('paper').value,model:$('model').value,question:q,top_k:5})});
+  root.replaceChildren();
+  for(const r of data.results){const card=document.createElement('article');card.className='evidence';const title=document.createElement('h3');title.textContent=`${r.rank}. ${r.section||'Unlabeled section'}`;const txt=document.createElement('p');txt.textContent=r.text;const meta=document.createElement('div');meta.className='meta';meta.textContent=`Passage ID: ${r.id} · Similarity/ranking score: ${r.score.toFixed(3)}`;card.append(title,txt,meta);root.append(card);}
+  if(!data.results.length) clearResults('No evidence candidates were returned for this paper.');
+  status(`${data.results.length} passages retrieved in ${data.latency_ms} ms. Evidence candidates, not verified answers.`);
+ } catch(e){clearResults('No evidence to display because retrieval failed.');status('Search failed: '+e.message);$('status').classList.add('error');}
+ finally {controls.forEach(id=>$(id).disabled=false);$('run').disabled=!$('paper').value;$('search-controls').setAttribute('aria-busy','false');}
+});
+async function init(){try{$('model').value=(await api('/api/config')).default_model;}catch{} await loadPapers();}
+init();
+</script></body></html>

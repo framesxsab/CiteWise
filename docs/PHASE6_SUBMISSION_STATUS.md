@@ -12,7 +12,7 @@ Updated 2026-10-20. The final held-out evaluation was run exactly once on 2026-1
 | User interface | Local Playwright tests against real validation papers, evidence/API parity, keyboard focus, loading/error states, desktop and 375/390px layout | Automated local checks passed; no manual assistive-technology review |
 | Deployment | Dockerfile and deployment configuration are present | Docker Engine unavailable; no image build, hosting account, public URL or HTTPS user flow verified |
 | Report and literature | Exactly ten-page report with seven cited works and measured figures | Complete as a local artifact; five recent retrieval/RAG papers (2024-2025) were checked against primary publisher/preprint pages |
-| GitHub publication readiness | Local Git repository, ignore rules, Python and npm locks, setup/testing docs | Not published; root source-code `LICENSE` is absent and must be selected by the project owner |
+| GitHub publication readiness | Published repository at `framesxsab/CiteWise`; ignore rules, Python and npm locks, setup/testing docs | Published at the Phase 6 baseline; root source-code `LICENSE` is absent and must be selected by the project owner |
 
 ## Frozen held-out results
 

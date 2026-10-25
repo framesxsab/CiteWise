@@ -165,13 +165,34 @@ def test_api_rejects_invalid_requests_and_returns_real_ranked_evidence(tmp_path,
         body=response.json()
         assert body["results"][0]["id"] == paper["paragraphs"][1]["id"]
         assert len(body["results"]) == 2
+        states = [
+            {"id": "bm25", "label": "BM25", "available": True, "status": "ready", "reason": ""},
+            {"id": "supervised-logistic", "label": "Logistic", "available": True, "status": "ready", "reason": ""},
+            {"id": "minilm", "label": "MiniLM", "available": True, "status": "weights_staged", "reason": ""},
+            {"id": "bge-base", "label": "BGE-base", "available": True, "status": "weights_staged", "reason": ""},
+            {"id": "e5-base-v2", "label": "E5", "available": False, "status": "weights_not_staged", "reason": "weights not staged"},
+            {"id": "gte-base", "label": "GTE", "available": True, "status": "weights_staged", "reason": ""},
+        ]
+        monkeypatch.setattr(app_module, "model_states", lambda: states)
         config=client.get("/api/config").json()
-        assert config["default_model"] == "bge-base"
-        assert "e5-base-v2" in config["available_models"]
+        assert config["default_model"] == "bm25"
+        assert config["configured_default_model"] == "e5-base-v2"
+        assert config["default_model_fallback"] is True
+        assert "e5-base-v2" not in config["available_models"]
+        assert next(m for m in config["models"] if m["id"] == "e5-base-v2")["available"] is False
+        unavailable=client.post("/api/search",json={"paper_id":"p1","question":"valid question","model":"e5-base-v2"})
+        assert unavailable.status_code == 503
+        assert "unavailable" in unavailable.json()["detail"]
         def unavailable(*args,**kwargs):
             raise RuntimeError("model unavailable")
         monkeypatch.setattr(app_module,"rank",unavailable)
-        unavailable=client.post("/api/search",json={"paper_id":"p1","question":"valid question","model":"gte-base"})
-        assert unavailable.status_code == 503
-        assert "unavailable" in unavailable.json()["detail"]
+        inference_failure=client.post("/api/search",json={"paper_id":"p1","question":"valid question","model":"gte-base"})
+        assert inference_failure.status_code == 503
+        assert "unavailable" in inference_failure.json()["detail"]
+        assert client.post("/api/search",json={"split":"test","paper_id":"p1","question":"valid question"}).status_code == 422
+        assert client.get("/api/papers?split=test").status_code == 422
+        research=client.get("/api/research").json()
+        assert research["evaluation"]["split"] == "validation"
+        assert research["evaluation"]["question_count"] == 888
+        assert research["evaluation"]["test_split_accessed"] is False
     app_module.paper_map.cache_clear()

@@ -4,13 +4,15 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const dir = path.dirname(fileURLToPath(import.meta.url));
-const pdf = path.join(dir, 'CiteWise_Final_Report.pdf');
-const qa = path.join(dir, 'qa');
+const name = process.argv[2] || 'CiteWise_Final_Report';
+const qaName = process.argv[3] || 'qa';
+const pdf = path.join(dir, `${name}.pdf`);
+const qa = path.join(dir, qaName);
 fs.mkdirSync(qa, { recursive: true });
 const browser = await chromium.launch({ headless: true });
 try {
   const page = await browser.newPage({ viewport: { width: 816, height: 1056 }, deviceScaleFactor: 1 });
-  await page.goto(`file://${path.join(dir, 'CiteWise_Final_Report.html').replaceAll('\\', '/')}`);
+  await page.goto(`file://${path.join(dir, `${name}.html`).replaceAll('\\', '/')}`);
   const pages = page.locator('.page');
   const count = await pages.count();
   if (count !== 10) throw new Error(`Expected 10 pages, found ${count}`);

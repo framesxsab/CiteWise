@@ -1,18 +1,26 @@
 from pathlib import Path
+import argparse
 import re
 import subprocess
 
 from markdown_it import MarkdownIt
 
 root = Path(__file__).resolve().parents[1]
-source = (root / "docs" / "FINAL_REPORT.md").read_text(encoding="utf-8")
+parser = argparse.ArgumentParser(description=__doc__)
+parser.add_argument("--source", default="docs/FINAL_REPORT.md")
+parser.add_argument("--name", default="CiteWise_Final_Report")
+parser.add_argument("--qa-dir", default="qa")
+args = parser.parse_args()
+if Path(args.name).name != args.name:
+    parser.error("--name must be a filename stem")
+source = (root / args.source).read_text(encoding="utf-8")
 chunks = re.split(r"(?m)^<!-- PAGE \d+ -->\s*$", source)
 pages = [chunks[0] + chunks[1], *chunks[2:]]
 if len(pages) != 10:
     raise SystemExit(f"Expected 10 report pages, found {len(pages)}")
 md = MarkdownIt("default", {"html": True}).enable("table")
 sections = "\n".join(f'<section class="page">{md.render(p)}</section>' for p in pages)
-html = f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><title>CiteWise Final Report</title>
+html = f'''<!doctype html><html lang="en"><head><meta charset="utf-8"><title>{args.name.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")}</title>
 <style>
 @page {{ size: Letter; margin: 0; }}
 * {{ box-sizing: border-box; }}
@@ -34,5 +42,5 @@ figcaption {{ font:7.5pt/1.2 Arial,sans-serif;margin-top:3pt; }}
 a {{ color:#174c68;text-decoration:none; }}
 </style></head><body>{sections}</body></html>'''
 out = root / "submission"
-(out / "CiteWise_Final_Report.html").write_text(html, encoding="utf-8")
-subprocess.run(["node", str(out / "render_report.mjs")], cwd=root, check=True)
+(out / f"{args.name}.html").write_text(html, encoding="utf-8")
+subprocess.run(["node", str(out / "render_report.mjs"), args.name, args.qa_dir], cwd=root, check=True)

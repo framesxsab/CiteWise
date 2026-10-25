@@ -4,57 +4,192 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CiteWise | Evidence-first scientific retrieval</title>
 <style>
-:root { color-scheme:light; font-family:Inter, ui-sans-serif, system-ui, Arial, sans-serif; background:#faf9f5; color:#20302d; }
-* { box-sizing:border-box; } body { margin:0; } main { max-width:1050px; margin:auto; padding:28px 20px 70px; }
+:root { color-scheme:light; font-family:Inter,ui-sans-serif,system-ui,Arial,sans-serif; background:#faf9f5; color:#20302d; }
+* { box-sizing:border-box; } body { margin:0; } main { max-width:1100px; margin:auto; padding:28px 20px 70px; }
 header { border-bottom:1px solid #dbe2dc; padding-bottom:19px; margin-bottom:25px; }
-small, .muted { color:#5f7169; } h1 { font-size:2.15rem; letter-spacing:-.05em; margin:5px 0; }
-h2 { font-size:1.1rem; margin:0 0 14px; } p { line-height:1.55; }
-label { display:block; margin:0 0 6px; font-weight:600; font-size:.86rem; }
-select, textarea { width:100%; background:#fff; color:inherit; border:1px solid #b7c8bf; border-radius:9px; padding:11px 12px; font:inherit; }
-textarea { resize:vertical; min-height:84px; } select:focus-visible, textarea:focus-visible, button:focus-visible { outline:3px solid #79ae9f; outline-offset:2px; }
+small,.muted { color:#5f7169; } h1 { font-size:2.15rem; letter-spacing:-.05em; margin:5px 0; }
+h2 { font-size:1.25rem; margin:0 0 12px; } h3 { margin:20px 0 8px; font-size:1rem; } p { line-height:1.55; }
+label { display:block; margin:0 0 6px; font-weight:600; font-size:.9rem; }
+select,textarea { width:100%; background:#fff; color:inherit; border:1px solid #b7c8bf; border-radius:9px; padding:11px 12px; font:inherit; }
+textarea { resize:vertical; min-height:84px; } select:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible { outline:3px solid #79ae9f; outline-offset:2px; }
 .controls { display:grid; grid-template-columns:1fr 1fr; gap:16px; } .wide { grid-column:1/-1; }
-section { margin:0 0 24px; } button { border:0; border-radius:9px; padding:12px 22px; background:#1d6657; color:white; font-weight:700; cursor:pointer; }
-button[disabled] { opacity:.4; cursor:not-allowed; } .evidence { background:white; padding:17px 20px; border:1px solid #dfebe3; border-radius:12px; margin:12px 0; }
-.evidence h3 { margin:0; font-size:.96rem; } .evidence p { margin:10px 0; } .meta { font-size:.81rem; color:#63786e; }
-#status { padding:14px 0; color:#425d53; min-height:42px; } #status.error { color:#9b2226; } .key { font-size:.76rem; letter-spacing:.12em; text-transform:uppercase; font-weight:700; color:#34786a; }
-@media (max-width:650px) { .controls { grid-template-columns:1fr; } .wide { grid-column:auto; } main { padding:18px 14px 55px; } h1 { font-size:1.9rem; } }
+section { margin:0 0 30px; } .panel { background:white; border:1px solid #dbe2dc; border-radius:12px; padding:20px; }
+button { border:0; border-radius:9px; padding:12px 22px; background:#1d6657; color:white; font-weight:700; cursor:pointer; }
+button[disabled] { opacity:.5; cursor:not-allowed; } .evidence { background:white; padding:17px 20px; border:1px solid #dfebe3; border-radius:12px; margin:12px 0; }
+.evidence h3 { margin:0; font-size:.96rem; } .evidence p { margin:10px 0; } .meta { font-size:.81rem; color:#536a60; overflow-wrap:anywhere; }
+#status,#research-status { padding:10px 0; color:#425d53; min-height:30px; } .error { color:#9b2226 !important; }
+.key { font-size:.76rem; letter-spacing:.12em; text-transform:uppercase; font-weight:700; color:#34786a; }
+.note { border-left:3px solid #8bb4a6; padding:8px 12px; background:#f2f7f4; }
+.table-scroll { overflow-x:auto; } table { border-collapse:collapse; width:100%; font-size:.88rem; }
+caption { text-align:left; font-weight:700; padding:0 0 8px; } th,td { border-bottom:1px solid #dbe2dc; padding:9px 8px; text-align:left; vertical-align:top; }
+th { background:#f2f5f2; } td { overflow-wrap:anywhere; } .status-ready { color:#176247; font-weight:700; } .status-missing { color:#8a4c00; font-weight:700; }
+.charts { display:grid; grid-template-columns:1fr 1fr; gap:14px; } figure.chart { min-width:0; margin:0; padding:14px; border:1px solid #e2e8e3; border-radius:10px; background:#fff; }
+figure.chart figcaption { font-weight:700; margin-bottom:6px; } svg.metric-chart { display:block; width:100%; height:auto; overflow:visible; font:12px Arial,sans-serif; }
+.chart-legend { font-size:.82rem; } .method-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px 22px; }
+.method-grid p { margin:0 0 8px; } .small { font-size:.84rem; }
+details { margin-top:18px; } summary { cursor:pointer; font-weight:700; padding:8px 0; }
+@media (max-width:700px) { main { padding:18px 14px 50px; } h1 { font-size:1.9rem; } .controls,.charts,.method-grid { grid-template-columns:1fr; } .wide { grid-column:auto; } .panel { padding:15px; } .table-scroll { overflow:visible; } .table-scroll table,.table-scroll thead,.table-scroll tbody,.table-scroll tr { display:block; width:100%; } .table-scroll thead { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); } .table-scroll tbody tr { border:1px solid #dbe2dc; border-radius:8px; padding:7px 10px; margin:10px 0; } .table-scroll tbody th,.table-scroll tbody td { display:grid; grid-template-columns:minmax(7.5rem,1fr) minmax(0,1.6fr); gap:8px; border:0; padding:6px 0; text-align:left; } .table-scroll tbody td::before { content:attr(data-label); font-size:.78rem; font-weight:700; color:#40564c; } }
 </style>
 </head>
 <body><main>
-<header><small class="key">Evidence-grounded scientific reading</small><h1>CiteWise</h1><p class="muted">Ask a question about a real research paper. Compare what different retrieval models find in its text.</p></header>
-<section aria-label="Research paper search" id="search-controls" aria-busy="false">
-<div class="controls"><div><label for="split">Dataset split</label><select id="split"><option value="validation">Validation</option><option value="train">Training</option><option value="test">Test</option></select></div>
-<div><label for="model">Retriever</label><select id="model"><option value="bm25">BM25 · lexical baseline</option><option value="supervised-logistic">Trained lexical ranker · supervised baseline</option><option value="minilm">MiniLM · semantic</option><option value="bge-base">BGE-base · instructed semantic retrieval</option><option value="bge-m3">BGE-M3 · optional, cached weights required</option><option value="qwen3-0.6b">Qwen3-Embedding-0.6B · optional, cached weights required</option><option value="e5-base-v2">E5-base-v2 · CPU alternative, cached weights required</option><option value="gte-base">GTE-base · CPU alternative, cached weights required</option></select></div>
-<div class="wide"><label for="paper">Scientific paper</label><select id="paper"><option value="">Loading actual papers…</option></select></div>
+<header><small class="key">Evidence-grounded scientific reading</small><h1>CiteWise</h1>
+<p class="muted">Search real QASPER research papers and compare evidence retrieval using measured validation results.</p></header>
+
+<section class="panel" aria-labelledby="search-title" id="search-controls" aria-busy="false">
+<h2 id="search-title">Search a research paper</h2>
+<p class="note">Interactive search and model selection use the QASPER validation split. The held-out test split is not available in this interface.</p>
+<div class="controls">
+<div><label for="split">Dataset split</label><select id="split" disabled><option value="validation">Validation (model-selection split)</option></select></div>
+<div><label for="model">Retriever</label><select id="model" disabled><option value="">Loading model availability…</option></select></div>
+<div class="wide"><label for="paper">Scientific paper</label><select id="paper"><option value="">Loading papers…</option></select></div>
 <div class="wide"><label for="sample">Annotated question (optional)</label><select id="sample"><option value="">Use my own question</option></select></div>
-<div class="wide"><label for="question">Question</label><textarea id="question" maxlength="2000" placeholder="Ask something about the selected paper"></textarea></div></div>
-<p><button id="run" disabled>Retrieve evidence</button></p><p id="status" role="status" aria-live="polite"></p></section>
-<section aria-labelledby="evidence-title"><h2 id="evidence-title">Retrieved evidence</h2><div id="results"><p class="muted">Search results from the selected paper appear here, with section names and retrieval scores.</p></div></section>
-</main><script>
-const $ = (id) => document.getElementById(id);
-const status = (text) => $('status').textContent = text;
+<div class="wide"><label for="question">Question</label><textarea id="question" maxlength="2000" placeholder="Ask something about the selected paper"></textarea></div>
+</div>
+<p><button id="run" disabled>Retrieve evidence</button></p><p id="status" role="status" aria-live="polite"></p>
+<div id="availability" class="small" aria-live="polite"></div>
+</section>
+
+<section aria-labelledby="evidence-title"><h2 id="evidence-title">Retrieved evidence</h2><div id="results"><p class="muted">Search results from the selected validation paper appear here with section names and ranking scores.</p></div></section>
+
+<section class="panel" aria-labelledby="comparison-title">
+<h2 id="comparison-title">Model comparison — QASPER validation</h2>
+<p id="research-status" role="status" aria-live="polite">Loading saved validation results…</p>
+<div id="comparison-summary"></div>
+<div class="charts" id="charts" aria-label="Validation retrieval metric charts">
+<figure class="chart"><figcaption>Recall@1</figcaption><svg class="metric-chart" id="chart-recall_at_1"></svg></figure>
+<figure class="chart"><figcaption>Recall@5</figcaption><svg class="metric-chart" id="chart-recall_at_5"></svg></figure>
+<figure class="chart"><figcaption>MRR@5</figcaption><svg class="metric-chart" id="chart-mrr_at_5"></svg></figure>
+<figure class="chart"><figcaption>nDCG@5</figcaption><svg class="metric-chart" id="chart-ndcg_at_5"></svg></figure>
+<figure class="chart"><figcaption>Recall@5 versus warm retrieval latency</figcaption><svg class="metric-chart" id="chart-quality-latency"></svg></figure>
+</div>
+<div class="table-scroll"><table id="comparison-table"><caption>Measured retrieval methods (validation only)</caption>
+<thead><tr><th scope="col">Model</th><th scope="col">Approach</th><th scope="col">Questions / papers</th><th scope="col">Recall@1</th><th scope="col">Recall@5</th><th scope="col">MRR@5</th><th scope="col">nDCG@5</th><th scope="col">Warm query P50/P95</th><th scope="col">Model load / document encode</th><th scope="col">Peak process RSS</th><th scope="col">Checkpoint ID prefix</th></tr></thead>
+<tbody></tbody></table></div>
+<details><summary>Neural checkpoint revisions and encoding settings</summary><div class="table-scroll"><table id="checkpoint-table"><caption>Configured target neural encoders</caption><thead><tr><th scope="col">Model</th><th scope="col">Repository</th><th scope="col">Pinned revision</th><th scope="col">Evaluation checkpoint ID</th><th scope="col">Tokens / pooling</th><th scope="col">Query prefix</th><th scope="col">Passage prefix</th><th scope="col">Validation status</th></tr></thead><tbody></tbody></table></div></details>
+<details><summary>Paired neural model comparisons</summary><p class="small muted">E5-base-v2 minus each other neural model; intervals are unadjusted 95% paper-cluster bootstrap intervals. An interval containing zero does not establish a directional difference.</p><div class="table-scroll"><table id="paired-table"><caption>Paired validation differences in percentage points</caption><thead><tr><th scope="col">Metric</th><th scope="col">Comparator</th><th scope="col">E5 minus comparator (95% CI)</th><th scope="col">Interval</th></tr></thead><tbody></tbody></table></div></details>
+<p class="small muted">Bars show macro means (teal for neural retrievers, blue-gray for baselines); whiskers show 95% paper-cluster bootstrap intervals. Warm query latency is measured with model and document vectors cached. Model loading and document encoding are reported separately. No held-out test metrics are used in this dashboard.</p>
+</section>
+
+<section class="panel" aria-labelledby="method-title">
+<h2 id="method-title">Dataset and methodology</h2>
+<div id="dataset-counts"></div>
+<div class="method-grid">
+<p><strong>Preprocessing.</strong> Empty paragraphs are removed, whitespace is collapsed, evidence is whitespace-normalized and case-folded, and matching gold text maps to stable original paragraph IDs. Figure/table-only and unmatched evidence are reported rather than converted into text.</p>
+<p><strong>Recall@k.</strong> For gold paragraph set G, Recall@k = |G ∩ top-k| / |G|. Recall@1 is computed from the first saved validation candidate.</p>
+<p><strong>MRR@5.</strong> Reciprocal rank of the first relevant paragraph within five results, or zero when none appears.</p>
+<p><strong>nDCG@5.</strong> Binary-relevance discounted gain divided by the ideal gain; relevant passages ranked earlier receive more credit.</p>
+<p><strong>Evaluation unit.</strong> Metrics are macro-averaged over scorable questions. Bootstrap resampling keeps questions from a paper together, using 2,000 replicates and seed 42.</p>
+<p id="model-handling"><strong>Neural model handling.</strong> The checkpoint table shows each neural model ID, pinned revision, query/document formatting and measured status. Validation results apply only to the QASPER validation split.</p>
+<p><strong>Encoder differences.</strong> MiniLM is the compact 6-layer encoder. BGE adds a retrieval instruction to the query and uses CLS pooling; E5 uses distinct query: and passage: prefixes with mean pooling; GTE uses general-purpose mean-pooled text embeddings. Different training objectives, text formatting and input truncation change the similarity geometry, so rankings differ; these comparisons do not isolate one cause.</p>
+</div>
+</section>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const api = async (url, options) => { const res=await fetch(url,options); const body=await res.json(); if(!res.ok) throw Error(body.detail||'Request failed'); return body; };
+const setStatus = (text,error=false) => { $('status').textContent=text; $('status').classList.toggle('error',error); };
 const clearResults = (message='Choose a paper and enter a question to see evidence candidates.') => { const p=document.createElement('p'); p.className='muted'; p.textContent=message; $('results').replaceChildren(p); };
-async function api(url, options) { const res = await fetch(url, options); const obj = await res.json(); if(!res.ok) throw Error(obj.detail || 'Request failed'); return obj; }
-function fillSelect(node, options, emptyText) { node.replaceChildren(); if(emptyText) node.add(new Option(emptyText, '')); for(const [label, value] of options) node.add(new Option(label, value)); }
-async function loadPapers(){ $('run').disabled=true; clearResults(); $('status').classList.remove('error'); status('Loading papers…'); try { const papers=await api('/api/papers?split='+encodeURIComponent($('split').value)); fillSelect($('paper'), papers.map(p=>[p.title || p.id,p.id]), 'Choose a research paper'); fillSelect($('sample'),[], 'Use my own question'); $('question').value=''; status(`${papers.length} real papers loaded from the ${$('split').value} split.`); } catch(e){fillSelect($('paper'),[], 'No dataset available'); status('Dataset setup required: '+e.message); $('status').classList.add('error');} }
-async function loadQuestions(){const id=$('paper').value; $('run').disabled=true; clearResults(); fillSelect($('sample'),[], 'Use my own question'); $('question').value=''; $('status').classList.remove('error'); if(!id) return; status('Loading annotated questions…'); try { const rows=await api('/api/questions/'+encodeURIComponent(id)+'?split='+encodeURIComponent($('split').value)); if($('paper').value!==id) return; fillSelect($('sample'),rows.map(q=>[q.text,q.text]), 'Use my own question'); status(''); } catch(e) { status('Could not load annotated questions: '+e.message); $('status').classList.add('error'); } finally { $('run').disabled=!$('paper').value; }}
-$('split').addEventListener('change',loadPapers); $('paper').addEventListener('change',loadQuestions);
-$('sample').addEventListener('change', () => { if($('sample').value) $('question').value=$('sample').value; });
-$('run').addEventListener('click', async ()=>{
- const q=$('question').value.trim();
- if(q.length<3){clearResults(); status('Enter a question with at least three characters.'); $('status').classList.add('error'); return;}
- const root=$('results'); clearResults('Retrieving evidence candidates…'); $('status').classList.remove('error');
- const controls=['split','model','paper','sample','question','run']; controls.forEach(id=>$(id).disabled=true); $('search-controls').setAttribute('aria-busy','true');
- status('Retrieving evidence. The first neural search also prepares the selected paper; please wait.');
+const SPLIT='validation';
+function fillSelect(node, options, emptyText) { node.replaceChildren(); if(emptyText) node.add(new Option(emptyText,'')); for(const [label,value] of options) node.add(new Option(label,value)); }
+function renderModels(config) {
+ const select=$('model'); select.replaceChildren();
+ for(const model of config.models){
+  const option=new Option(model.label,model.id); option.disabled=!model.available;
+  if(!model.available) option.textContent += ' — unavailable: '+model.reason;
+  select.add(option);
+ }
+ select.disabled=config.available_models.length===0;
+ if(config.default_model) select.value=config.default_model;
+ if(config.default_model_fallback) $('availability').textContent=`Configured default ${config.configured_default_model} is not staged; using BM25.`;
+ const missing=config.models.filter(m=>!m.available&&m.id!=='bm25');
+ if(missing.length) $('availability').textContent += ( $('availability').textContent?' ':'')+'Unavailable choices are disabled. '+missing.map(m=>m.id+': '+m.reason).join(' ');
+}
+async function loadPapers(){
+ $('run').disabled=true; clearResults(); setStatus('Loading validation papers.');
+ try { const papers=await api('/api/papers?split='+SPLIT); fillSelect($('paper'),papers.map(p=>[p.title||p.id,p.id]),'Choose a research paper'); fillSelect($('sample'),[],'Use my own question'); $('question').value=''; setStatus(`${papers.length} real papers loaded from QASPER validation.`); }
+ catch(e){ fillSelect($('paper'),[],'No dataset available'); setStatus('Dataset setup required: '+e.message,true); }
+}
+async function loadQuestions(){
+ const id=$('paper').value; $('run').disabled=true; clearResults(); fillSelect($('sample'),[],'Use my own question'); $('question').value=''; if(!id) return;
+ setStatus('Loading annotated questions.');
+ try { const rows=await api('/api/questions/'+encodeURIComponent(id)+'?split='+SPLIT); if($('paper').value!==id) return; fillSelect($('sample'),rows.map(q=>[q.text,q.text]),'Use my own question'); setStatus(''); }
+ catch(e){ setStatus('Could not load annotated questions: '+e.message,true); }
+ finally { $('run').disabled=!$('paper').value||!$('model').value; }
+}
+$('paper').addEventListener('change',loadQuestions);
+$('sample').addEventListener('change',()=>{if($('sample').value) $('question').value=$('sample').value;});
+$('run').addEventListener('click',async()=>{
+ const q=$('question').value.trim(); if(q.length<3){clearResults();setStatus('Enter a question with at least three characters.',true);return;}
+ clearResults('Retrieving evidence candidates…'); setStatus('Retrieving evidence. The first neural search may encode this paper.');
+ const controls=['model','paper','sample','question','run']; controls.forEach(id=>$(id).disabled=true); $('search-controls').setAttribute('aria-busy','true');
  try {
-  const data=await api('/api/search',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({split:$('split').value,paper_id:$('paper').value,model:$('model').value,question:q,top_k:5})});
-  root.replaceChildren();
-  for(const r of data.results){const card=document.createElement('article');card.className='evidence';const title=document.createElement('h3');title.textContent=`${r.rank}. ${r.section||'Unlabeled section'}`;const txt=document.createElement('p');txt.textContent=r.text;const meta=document.createElement('div');meta.className='meta';meta.textContent=`Passage ID: ${r.id} · Similarity/ranking score: ${r.score.toFixed(3)}`;card.append(title,txt,meta);root.append(card);}
+  const data=await api('/api/search',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({split:SPLIT,paper_id:$('paper').value,model:$('model').value,question:q,top_k:5})});
+  const root=$('results'); root.replaceChildren();
+  for(const r of data.results){const card=document.createElement('article');card.className='evidence';const title=document.createElement('h3');title.textContent=`${r.rank}. ${r.section||'Unlabeled section'}`;const txt=document.createElement('p');txt.textContent=r.text;const meta=document.createElement('div');meta.className='meta';meta.textContent=`Passage ID: ${r.id} · Ranking score: ${r.score.toFixed(3)}`;card.append(title,txt,meta);root.append(card);}
   if(!data.results.length) clearResults('No evidence candidates were returned for this paper.');
-  status(`${data.results.length} passages retrieved in ${data.latency_ms} ms. Evidence candidates, not verified answers.`);
- } catch(e){clearResults('No evidence to display because retrieval failed.');status('Search failed: '+e.message);$('status').classList.add('error');}
+  setStatus(`${data.results.length} passages retrieved in ${data.latency_ms} ms. These are evidence candidates, not verified answers.`);
+ } catch(e){clearResults('No evidence to display because retrieval failed.');setStatus('Search failed: '+e.message,true);}
  finally {controls.forEach(id=>$(id).disabled=false);$('run').disabled=!$('paper').value;$('search-controls').setAttribute('aria-busy','false');}
 });
-async function init(){try{$('model').value=(await api('/api/config')).default_model;}catch{} await loadPapers();}
+const addSvg=(parent,name,attrs={},text='')=>{const n=document.createElementNS('http://www.w3.org/2000/svg',name);for(const [k,v] of Object.entries(attrs))n.setAttribute(k,String(v));if(text)n.textContent=text;parent.append(n);return n;};
+function renderMetricChart(svgId,models,key,label){
+ const svg=$(svgId), measured=models.filter(m=>m.status==='evaluated'); const width=720,left=190,plot=420,row=38,top=22,max=.60,height=top+measured.length*row+32;
+ svg.replaceChildren(); svg.setAttribute('viewBox',`0 0 ${width} ${height}`); svg.setAttribute('role','img'); svg.setAttribute('aria-labelledby',svgId+'-title '+svgId+'-desc');
+ addSvg(svg,'title',{id:svgId+'-title'},`${label} on QASPER validation`);
+ addSvg(svg,'desc',{id:svgId+'-desc'},`Macro ${label.toLowerCase()} for ${models.filter(m=>m.status==='evaluated').length} measured methods over 888 scorable validation questions. Bars show means and whiskers show paper-cluster 95 percent confidence intervals.`);
+ for(let t=0;t<=4;t++){const x=left+plot*t/4;addSvg(svg,'line',{x1:x,y1:top-8,x2:x,y2:top+measured.length*row-7,stroke:'#d9e2dc'});addSvg(svg,'text',{x,y:height-5,'text-anchor':'middle',fill:'#40564c'},`${t*15}%`);}
+ measured.forEach((m,i)=>{const y=top+i*row,v=m.scores[key],mean=v.mean,lo=v.ci95_low,hi=v.ci95_high;addSvg(svg,'text',{x:left-10,y:y+16,'text-anchor':'end',fill:'#20302d'},m.label);addSvg(svg,'rect',{x:left,y,width:Math.max(0,mean/max*plot),height:18,rx:3,fill:m.family==='neural retriever'?'#34786a':'#617c91'});addSvg(svg,'line',{x1:left+lo/max*plot,x2:left+hi/max*plot,y1:y+9,y2:y+9,stroke:'#17212b','stroke-width':2});addSvg(svg,'line',{x1:left+lo/max*plot,x2:left+lo/max*plot,y1:y+4,y2:y+14,stroke:'#17212b','stroke-width':2});addSvg(svg,'line',{x1:left+hi/max*plot,x2:left+hi/max*plot,y1:y+4,y2:y+14,stroke:'#17212b','stroke-width':2});addSvg(svg,'text',{x:left+plot+8,y:y+14,fill:'#20302d'},`${(mean*100).toFixed(1)}%`);});
+}
+function renderQualityLatency(models){
+ const svg=$('chart-quality-latency'),measured=models.filter(m=>m.status==='evaluated');
+ const width=720,height=300,left=72,right=22,top=20,bottom=58,plotW=width-left-right,plotH=height-top-bottom;
+ const xMin=Math.log(2),xMax=Math.log(130),yMax=.65;
+ const x=value=>left+(Math.log(value)-xMin)/(xMax-xMin)*plotW,y=value=>top+(1-value/yMax)*plotH;
+ svg.replaceChildren();svg.setAttribute('viewBox',`0 0 ${width} ${height}`);svg.setAttribute('role','img');svg.setAttribute('aria-labelledby','quality-latency-title quality-latency-desc');
+ addSvg(svg,'title',{id:'quality-latency-title'},'Recall@5 versus warm retrieval latency on QASPER validation');
+ addSvg(svg,'desc',{id:'quality-latency-desc'},'Six validation methods. Horizontal position is logarithmic warm P50 latency in milliseconds. Vertical position is Recall at 5; whiskers show paper-cluster 95 percent intervals.');
+ for(const pct of [0,.15,.30,.45,.60]){const yy=y(pct);addSvg(svg,'line',{x1:left,y1:yy,x2:width-right,y2:yy,stroke:'#d9e2dc'});addSvg(svg,'text',{x:left-8,y:yy+4,'text-anchor':'end',fill:'#40564c'},`${Math.round(pct*100)}%`);}
+ for(const ms of [2,5,10,25,50,100]){const xx=x(ms);addSvg(svg,'line',{x1:xx,y1:top,x2:xx,y2:height-bottom,stroke:'#e2e8e3'});addSvg(svg,'text',{x:xx,y:height-35,'text-anchor':'middle',fill:'#40564c'},`${ms}`);}
+ addSvg(svg,'text',{x:left+plotW/2,y:height-8,'text-anchor':'middle',fill:'#40564c'},'Warm query P50 latency (ms, log scale)');
+ const offsets={bm25:[8,-8],'supervised-logistic':[8,-8],minilm:[8,-8],'bge-base':[8,-8],'e5-base-v2':[-8,-12],'gte-base':[8,18]};
+ for(const m of measured){const point=m.scores.recall_at_5,xx=x(m.latency_ms.p50),yy=y(point.mean),low=y(point.ci95_low),high=y(point.ci95_high),neural=m.family==='neural retriever',color=neural?'#34786a':'#617c91';
+  addSvg(svg,'line',{x1:xx,y1:high,x2:xx,y2:low,stroke:color,'stroke-width':2});addSvg(svg,'line',{x1:xx-4,y1:high,x2:xx+4,y2:high,stroke:color,'stroke-width':2});addSvg(svg,'line',{x1:xx-4,y1:low,x2:xx+4,y2:low,stroke:color,'stroke-width':2});
+  if(neural)addSvg(svg,'circle',{cx:xx,cy:yy,r:5,fill:color});else addSvg(svg,'rect',{x:xx-5,y:yy-5,width:10,height:10,fill:color});
+  const [dx,dy]=offsets[m.id]||[8,-8];addSvg(svg,'text',{x:xx+dx,y:yy+dy,'text-anchor':dx<0?'end':'start',fill:'#20302d'},m.label);
+ }
+}
+function renderResearch(data){
+ const ev=data.evaluation; $('research-status').textContent=`Validation-only comparison · ${ev.question_count} scorable questions · ${ev.evaluated_paper_clusters} paper clusters · 2,000 paper-cluster bootstrap replicates.`;
+ $('comparison-summary').replaceChildren(); const p=document.createElement('p');const measuredNeural=ev.models.filter(m=>m.family==='neural retriever'&&m.status==='evaluated');const unmeasured=ev.models.filter(m=>m.family==='neural retriever'&&m.status!=='evaluated');const fastest=measuredNeural.slice().sort((a,b)=>a.latency_ms.p50-b.latency_ms.p50)[0];
+ const metrics=[['recall_at_1','Recall@1'],['recall_at_5','Recall@5'],['mrr_at_5','MRR@5'],['ndcg_at_5','nDCG@5']];const leaders=metrics.map(([key,label])=>`${label}: ${measuredNeural.slice().sort((a,b)=>b.scores[key].mean-a.scores[key].mean)[0]?.label||'not available'}`).join('; ');
+ p.textContent=`Four faculty-specified neural retrievers were evaluated alongside BM25 and supervised logistic baselines.${unmeasured.length?` Not evaluated: ${unmeasured.map(m=>m.label).join(', ')}.`:''} Highest neural point estimates: ${leaders}. Fastest neural warm P50: ${fastest?.label||'not available'}. Point-estimate leaders are descriptive; paired uncertainty is shown below.`; $('comparison-summary').append(p);
+ const sourceNote=ev.source_compatibility;if(sourceNote?.status==='checkpoint_io_migration'){const note=document.createElement('p');note.className='note small';note.textContent='Checkpoint provenance: the resumed lexical baseline checkpoints retain the original source fingerprint; neural model runs record the checkpoint-recovery writer fingerprint. The full validation artifact records per-model source hashes, and dataset SHA, query-plan SHA, retrieval/evaluation files and protocol were verified compatible.';$('comparison-summary').append(note);}
+ const handling=$('model-handling');handling.textContent=`Neural model handling. ${measuredNeural.length} target neural models have saved validation results; ${unmeasured.length?`${unmeasured.map(m=>m.label).join(', ')} remain unmeasured.`:'all four requested neural models were evaluated on this validation split.'} The checkpoint table shows model IDs, pinned revisions, query/document formatting and pooling.`;
+ const body=$('comparison-table').querySelector('tbody');body.replaceChildren();
+ for(const m of ev.models){const tr=document.createElement('tr');
+  const percent=score=>`${(score.mean*100).toFixed(2)}% [${(score.ci95_low*100).toFixed(2)}, ${(score.ci95_high*100).toFixed(2)}]`;
+  const values=m.status==='evaluated'?[`${m.question_count} / ${m.paper_count}`,percent(m.scores.recall_at_1),percent(m.scores.recall_at_5),percent(m.scores.mrr_at_5),percent(m.scores.ndcg_at_5),`${m.latency_ms.p50.toFixed(1)} / ${m.latency_ms.p95.toFixed(1)} ms`,`${m.model_loading_ms.toFixed(0)} ms / ${(m.document_encoding_ms/1000).toFixed(1)} s`,m.peak_rss_bytes?`${(m.peak_rss_bytes/1073741824).toFixed(2)} GiB`:(m.peak_rss_bytes===0?'0.00 GiB':'—'),m.checkpoint_id?m.checkpoint_id.slice(0,12):'—']:['Not evaluated','Not evaluated','Not evaluated','Not evaluated','Not evaluated','—','—','—','—'];
+  const headers=Array.from($('comparison-table').querySelectorAll('thead th'),th=>th.textContent);
+  const cols=[m.label,m.family,...values];cols.forEach((value,i)=>{const td=document.createElement('td');td.dataset.label=headers[i];td.textContent=value;if(i===0){const strong=document.createElement('strong');strong.textContent=value;td.replaceChildren(strong);}if(m.status!=='evaluated'&&i===1){td.textContent='Not evaluated — no saved validation score';td.className='status-missing';}tr.append(td);});body.append(tr);
+ }
+ const checkpoints=$('checkpoint-table').querySelector('tbody');checkpoints.replaceChildren();
+ for(const m of ev.models.filter(m=>m.family==='neural retriever')){const tr=document.createElement('tr'),spec=m.spec||{};const values=[m.label,m.model_id||'—',m.model_revision||'—',m.checkpoint_id||'—',spec.max_seq_length?`${spec.max_seq_length} / ${spec.pooling}`:'—',spec.query_prefix||'none',spec.passage_prefix||'none',m.status==='evaluated'?'Evaluated on validation':'Not evaluated'];values.forEach((value,i)=>{const td=document.createElement('td');td.dataset.label=['Model','Repository','Pinned revision','Evaluation checkpoint ID','Tokens / pooling','Query prefix','Passage prefix','Validation status'][i];td.textContent=value;tr.append(td);});checkpoints.append(tr);}
+ const chartLabels={recall_at_1:'Recall@1',recall_at_5:'Recall@5',mrr_at_5:'MRR@5',ndcg_at_5:'nDCG@5'};
+ for(const [key,label] of Object.entries(chartLabels)) renderMetricChart('chart-'+key,ev.models,key,label);
+ renderQualityLatency(ev.models);
+ const pairBody=$('paired-table').querySelector('tbody');pairBody.replaceChildren();
+ const pairFor=(left,right,metric,records)=>{for(const pair of records){if(pair.metric!==metric)continue;if(pair.model_a===left&&pair.model_b===right)return [pair.mean_difference_a_minus_b,pair.ci95_low,pair.ci95_high];if(pair.model_a===right&&pair.model_b===left)return [-pair.mean_difference_a_minus_b,-pair.ci95_high,-pair.ci95_low];}return null;};
+ const pairMetrics=[...metrics],e5='e5-base-v2',comparisonRecords=[...ev.paired_comparisons];
+ for(const competitor of ['minilm','bge-base','gte-base'])for(const [key,label] of pairMetrics){const source=key==='recall_at_1'?ev.neural_recall_at_1_comparisons:comparisonRecords;const value=pairFor(e5,competitor,key,source);if(!value)continue;const [mean,low,high]=value;const tr=document.createElement('tr');const values=[label,ev.models.find(m=>m.id===competitor)?.label||competitor,`${(mean*100).toFixed(2)} pp [${(low*100).toFixed(2)}, ${(high*100).toFixed(2)}]`,low<=0&&high>=0?'Includes zero':'Excludes zero'];values.forEach((text,i)=>{const td=document.createElement('td');td.dataset.label=['Metric','Comparator','E5 minus comparator (95% CI)','Interval'][i];td.textContent=text;tr.append(td);});pairBody.append(tr);}
+ const d=data.dataset, root=$('dataset-counts');root.replaceChildren();
+ const source=document.createElement('p');source.textContent=`Source: ${d.name}, revision ${d.revision}, ${d.license}. Official paper-level splits are unchanged.`;root.append(source);
+ const wrap=document.createElement('div');wrap.className='table-scroll';const table=document.createElement('table');const caption=document.createElement('caption');caption.textContent='Prepared dataset counts by official split';table.append(caption);
+ const head=document.createElement('thead'),headRow=document.createElement('tr');for(const label of ['Split','Papers','Non-empty paragraphs','Questions','Scorable','Excluded from ranking']){const th=document.createElement('th');th.scope='col';th.textContent=label;headRow.append(th);}head.append(headRow);table.append(head);
+ const countLabels=['Split','Papers','Non-empty paragraphs','Questions','Scorable','Excluded from ranking'];const tbody=document.createElement('tbody');for(const name of ['train','validation','test']){const s=d.splits[name],tr=document.createElement('tr');const values=[name[0].toUpperCase()+name.slice(1),s.papers,s.paragraphs,s.questions,s.questions_scorable,s.questions_unmatched_or_no_text_evidence+s.questions_unanswerable];values.forEach((value,i)=>{const cell=i===0?document.createElement('th'):document.createElement('td');if(cell.tagName==='TH')cell.scope='row';cell.dataset.label=countLabels[i];cell.textContent=Number.isFinite(value)?value.toLocaleString():value;tr.append(cell);});tbody.append(tr);}table.append(tbody);wrap.append(table);root.append(wrap);
+ const note=document.createElement('p');note.className='small muted';note.textContent='Excluded questions are unanswerable or have no mapped textual evidence. Test counts are shown for provenance only; test questions and test metrics are not interactive or displayed here.';root.append(note);
+ const env=data.evaluation.environment, host=document.createElement('p');host.className='small muted';host.textContent=`Measured environment: ${env.os}; ${env.processor}; ${env.cpu_count} logical CPUs; ${(env.total_physical_memory_bytes/1073741824).toFixed(1)} GiB RAM; Python ${env.python}; CPU inference.`;root.append(host);
+}
+async function loadResearch(){try{renderResearch(await api('/api/research'));}catch(e){$('research-status').textContent='Saved validation comparison unavailable: '+e.message;$('research-status').classList.add('error');}}
+async function init(){const jobs=[loadPapers(),loadResearch()];try{renderModels(await api('/api/config'));}catch(e){$('availability').textContent='Could not check model availability: '+e.message;$('availability').classList.add('error');}await Promise.all(jobs);}
 init();
 </script></body></html>

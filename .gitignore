@@ -15,3 +15,8 @@ weights/
 dist/
 build/
 *.egg-info/
+# Rebuilt from the Markdown sources and assets; retain the versioned PDFs instead.
+submission/CiteWise_Final_Report_Phase8.html
+submission/CiteWise_Final_Report_Phase9.html
+submission/qa-phase8/
+submission/qa-phase9/

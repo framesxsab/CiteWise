@@ -1,0 +1,977 @@
+{
+  "dataset": {
+    "name": "allenai/qasper",
+    "revision": "91bc63e221475d59a6e17e4299fbfc5a919d7c7a",
+    "license": "CC BY 4.0",
+    "splits": {
+      "train": {
+        "papers": 888,
+        "paragraphs": 46882,
+        "questions": 2593,
+        "questions_scorable": 2098,
+        "unsupported_figure_items": 386,
+        "questions_unmatched_or_no_text_evidence": 224,
+        "questions_unanswerable": 271
+      },
+      "validation": {
+        "papers": 281,
+        "paragraphs": 13266,
+        "questions": 1005,
+        "questions_scorable": 888,
+        "unsupported_figure_items": 253,
+        "questions_unmatched_or_no_text_evidence": 57,
+        "questions_unanswerable": 60
+      },
+      "test": {
+        "papers": 416,
+        "paragraphs": 19817,
+        "questions": 1451,
+        "questions_scorable": 1309,
+        "unsupported_figure_items": 459,
+        "questions_unmatched_or_no_text_evidence": 63,
+        "questions_unanswerable": 79
+      }
+    }
+  },
+  "evaluation": {
+    "split": "validation",
+    "protocol": "qasper-paragraph-retrieval-v3-instructed",
+    "paper_count": 281,
+    "evaluated_paper_clusters": 276,
+    "question_count": 888,
+    "top_k": 5,
+    "total_questions": 1005,
+    "configuration": {
+      "protocol": "qasper-paragraph-retrieval-v3-instructed",
+      "device": "cpu",
+      "threads": 4,
+      "batch_size": 8,
+      "precision": "float32",
+      "normalize_embeddings": true,
+      "similarity": "normalized dot product",
+      "blas_threads": {
+        "OPENBLAS_NUM_THREADS": "1",
+        "OMP_NUM_THREADS": "4",
+        "MKL_NUM_THREADS": "4"
+      }
+    },
+    "environment": {
+      "os": "Windows-11-10.0.26200-SP0",
+      "processor": "AMD64 Family 25 Model 68 Stepping 1, AuthenticAMD",
+      "cpu_count": 16,
+      "python": "3.14.3",
+      "total_physical_memory_bytes": 16989728768,
+      "packages": {
+        "numpy": "2.5.4",
+        "scikit-learn": "1.9.1",
+        "sentence-transformers": "5.7.0",
+        "torch": "2.14.1",
+        "transformers": "5.20.1",
+        "huggingface-hub": "1.33.0",
+        "datasets": "4.8.5",
+        "fastapi": "0.143.3"
+      },
+      "cuda_available": null,
+      "gpu": null,
+      "cuda_probe_performed": false
+    },
+    "source_compatibility": {
+      "status": "checkpoint_io_migration",
+      "source_sha256_by_model": {
+        "bm25": "ec7384454bb461d8452a0aadfbc259f36969540cd368b42d19bed0920f5ececd",
+        "supervised-logistic": "ec7384454bb461d8452a0aadfbc259f36969540cd368b42d19bed0920f5ececd",
+        "minilm": "6619d499876cb3d3e6cf55a3d43d2d5f89ba953eb357926464ad599b04a237c8",
+        "bge-base": "6619d499876cb3d3e6cf55a3d43d2d5f89ba953eb357926464ad599b04a237c8",
+        "e5-base-v2": "6619d499876cb3d3e6cf55a3d43d2d5f89ba953eb357926464ad599b04a237c8",
+        "gte-base": "6619d499876cb3d3e6cf55a3d43d2d5f89ba953eb357926464ad599b04a237c8"
+      },
+      "legacy_source_sha256": "ec7384454bb461d8452a0aadfbc259f36969540cd368b42d19bed0920f5ececd",
+      "phase8_run_source_sha256": "6619d499876cb3d3e6cf55a3d43d2d5f89ba953eb357926464ad599b04a237c8",
+      "checkpoint_writer_sha256": "7fa5aa78b22fec34deef9cd2061d2539aa4caf9950fd03013969965631cb9906",
+      "note": "Source hashes differ only across the checkpoint-writer compatibility migration; retrieval/evaluation hashes, data, query plan, protocol and normalized hardware match."
+    },
+    "bootstrap": {
+      "unit": "paper",
+      "replicates": 2000,
+      "seed": 42
+    },
+    "models": [
+      {
+        "id": "bm25",
+        "label": "BM25",
+        "family": "lexical baseline",
+        "description": "Classical lexical paragraph retrieval.",
+        "status": "evaluated",
+        "question_count": 888,
+        "scores": {
+          "recall_at_1": {
+            "mean": 0.13956618742802954,
+            "ci95_low": 0.11951560357551184,
+            "ci95_high": 0.1607150213911402,
+            "paper_clusters": 276,
+            "bootstrap_reps": 2000,
+            "seed": 42
+          },
+          "recall_at_5": {
+            "mean": 0.4431888513448111,
+            "ci95_low": 0.4104035627966516,
+            "ci95_high": 0.4744222529937113
+          },
+          "mrr_at_5": {
+            "mean": 0.3456081081081081,
+            "ci95_low": 0.3201075224965592,
+            "ci95_high": 0.3721269530933021
+          },
+          "ndcg_at_5": {
+            "mean": 0.3285890231554241,
+            "ci95_low": 0.3033427538217907,
+            "ci95_high": 0.3531770060011106
+          }
+        },
+        "latency_ms": {
+          "p50": 2.698299998883158,
+          "p95": 5.257600001641549,
+          "basis": "model and document encodings cached; query encoding, scoring and sorting"
+        },
+        "paper_count": 276,
+        "model_loading_ms": 0.006100002792663872,
+        "document_encoding_ms": 0.0,
+        "peak_rss_bytes": 61804544,
+        "model_id": "bm25",
+        "model_revision": null,
+        "spec": null,
+        "checkpoint_id": "72a0c22ef939960521c2ae3362b854b24c52a20f0a042f8321b146537ba36907"
+      },
+      {
+        "id": "supervised-logistic",
+        "label": "Supervised logistic",
+        "family": "supervised lexical baseline",
+        "description": "Train-fitted feature ranker; retained as a measured negative result.",
+        "status": "evaluated",
+        "question_count": 888,
+        "scores": {
+          "recall_at_1": {
+            "mean": 0.007103532103532103,
+            "ci95_low": 0.0035324283280014136,
+            "ci95_high": 0.011630084740866964,
+            "paper_clusters": 276,
+            "bootstrap_reps": 2000,
+            "seed": 42
+          },
+          "recall_at_5": {
+            "mean": 0.049324205342007196,
+            "ci95_low": 0.037355860089775754,
+            "ci95_high": 0.06268306994668206
+          },
+          "mrr_at_5": {
+            "mean": 0.052045795795795796,
+            "ci95_low": 0.04127879866317649,
+            "ci95_high": 0.06380562914951665
+          },
+          "ndcg_at_5": {
+            "mean": 0.039100325010129396,
+            "ci95_low": 0.030895779388236268,
+            "ci95_high": 0.048563956968794154
+          }
+        },
+        "latency_ms": {
+          "p50": 4.809100000784383,
+          "p95": 9.313500002463115,
+          "basis": "model and document encodings cached; query encoding, scoring and sorting"
+        },
+        "paper_count": 276,
+        "model_loading_ms": 4809.527800000069,
+        "document_encoding_ms": 0.0,
+        "peak_rss_bytes": 195502080,
+        "model_id": "supervised-logistic",
+        "model_revision": null,
+        "spec": null,
+        "checkpoint_id": "14e64d4c4dfc7f3af2369fe526268ef1b71fd40c989404f1b619d5ea130b2ea3"
+      },
+      {
+        "id": "minilm",
+        "label": "MiniLM-L6-v2",
+        "family": "neural retriever",
+        "description": "Pretrained sentence encoder with mean pooling and 256-token truncation.",
+        "status": "evaluated",
+        "question_count": 888,
+        "scores": {
+          "recall_at_1": {
+            "mean": 0.14035585696769906,
+            "ci95_low": 0.11885969216310065,
+            "ci95_high": 0.1630765510987938,
+            "paper_clusters": 276,
+            "bootstrap_reps": 2000,
+            "seed": 42
+          },
+          "recall_at_5": {
+            "mean": 0.46109923690225546,
+            "ci95_low": 0.43144363468748104,
+            "ci95_high": 0.4899022405464619
+          },
+          "mrr_at_5": {
+            "mean": 0.3605292792792793,
+            "ci95_low": 0.3333508252601364,
+            "ci95_high": 0.3891004564856023
+          },
+          "ndcg_at_5": {
+            "mean": 0.3456541141846348,
+            "ci95_low": 0.3219597327045668,
+            "ci95_high": 0.3695350564632623
+          }
+        },
+        "latency_ms": {
+          "p50": 18.806849999236874,
+          "p95": 26.220699997793417,
+          "basis": "model and document encodings cached; query encoding, scoring and sorting"
+        },
+        "paper_count": 276,
+        "model_loading_ms": 659.8420000009355,
+        "document_encoding_ms": 421913.97339998,
+        "peak_rss_bytes": 753733632,
+        "model_id": "sentence-transformers/all-MiniLM-L6-v2",
+        "model_revision": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+        "spec": {
+          "max_seq_length": 256,
+          "pooling": "mean",
+          "query_prefix": "",
+          "passage_prefix": ""
+        },
+        "checkpoint_id": "2c0033877978452e248dfa3c074904658e97dc502ce7dcf9d7bfec1c0bcd54ef"
+      },
+      {
+        "id": "bge-base",
+        "label": "BGE-base-en-v1.5",
+        "family": "neural retriever",
+        "description": "Pretrained instructed encoder with CLS pooling and 512-token truncation.",
+        "status": "evaluated",
+        "question_count": 888,
+        "scores": {
+          "recall_at_1": {
+            "mean": 0.2010571832940254,
+            "ci95_low": 0.1787326910563543,
+            "ci95_high": 0.22523185984834146,
+            "paper_clusters": 276,
+            "bootstrap_reps": 2000,
+            "seed": 42
+          },
+          "recall_at_5": {
+            "mean": 0.5210122104181701,
+            "ci95_low": 0.4919676453971315,
+            "ci95_high": 0.5507863116966546
+          },
+          "mrr_at_5": {
+            "mean": 0.43873873873873875,
+            "ci95_low": 0.4098618291663593,
+            "ci95_high": 0.4660389582174639
+          },
+          "ndcg_at_5": {
+            "mean": 0.4141540160260472,
+            "ci95_low": 0.38979782055727596,
+            "ci95_high": 0.43947124110522023
+          }
+        },
+        "latency_ms": {
+          "p50": 88.17829999861715,
+          "p95": 110.40819999834639,
+          "basis": "model and document encodings cached; query encoding, scoring and sorting"
+        },
+        "paper_count": 276,
+        "model_loading_ms": 1081.1541000002762,
+        "document_encoding_ms": 3029045.70269999,
+        "peak_rss_bytes": 1262051328,
+        "model_id": "BAAI/bge-base-en-v1.5",
+        "model_revision": "a5beb1e3e68b9ab74eb54cfd186867f64f240e1a",
+        "spec": {
+          "max_seq_length": 512,
+          "pooling": "cls",
+          "query_prefix": "Represent this sentence for searching relevant passages: ",
+          "passage_prefix": ""
+        },
+        "checkpoint_id": "1276b46e3d7ca40ce6b2f75615e6d381456b8967afa3557e343ed598d87db601"
+      },
+      {
+        "id": "e5-base-v2",
+        "label": "E5-base-v2",
+        "family": "neural retriever",
+        "description": "Uses query: and passage: prefixes with mean pooling and 512-token truncation.",
+        "status": "evaluated",
+        "question_count": 888,
+        "scores": {
+          "recall_at_1": {
+            "mean": 0.21656908318092527,
+            "ci95_low": 0.19104094515649292,
+            "ci95_high": 0.2416045297871217,
+            "paper_clusters": 276,
+            "bootstrap_reps": 2000,
+            "seed": 42
+          },
+          "recall_at_5": {
+            "mean": 0.5467454278793288,
+            "ci95_low": 0.5153519182833278,
+            "ci95_high": 0.5763083545187448
+          },
+          "mrr_at_5": {
+            "mean": 0.46086711711711714,
+            "ci95_low": 0.4326890723012699,
+            "ci95_high": 0.48894312053094713
+          },
+          "ndcg_at_5": {
+            "mean": 0.4339552174869224,
+            "ci95_low": 0.4083131668034418,
+            "ci95_high": 0.4578717283344023
+          }
+        },
+        "latency_ms": {
+          "p50": 73.3121499997651,
+          "p95": 91.22699999716133,
+          "basis": "model and document encodings cached; query encoding, scoring and sorting"
+        },
+        "paper_count": 276,
+        "model_loading_ms": 1042.1325999996043,
+        "document_encoding_ms": 2982782.5201999876,
+        "peak_rss_bytes": 1245544448,
+        "model_id": "intfloat/e5-base-v2",
+        "model_revision": "1c644c92ad3ba1efdad3f1451a637716616a20e8",
+        "spec": {
+          "max_seq_length": 512,
+          "pooling": "mean",
+          "query_prefix": "query: ",
+          "passage_prefix": "passage: "
+        },
+        "checkpoint_id": "9c213a7880437305ed6fc0f81ff244b6e6f78963ac24c7030f25a845b2c543db"
+      },
+      {
+        "id": "gte-base",
+        "label": "GTE-base",
+        "family": "neural retriever",
+        "description": "Uses plain text with mean pooling and 512-token truncation.",
+        "status": "evaluated",
+        "question_count": 888,
+        "scores": {
+          "recall_at_1": {
+            "mean": 0.1393454715823137,
+            "ci95_low": 0.11833736615792802,
+            "ci95_high": 0.16137565507132476,
+            "paper_clusters": 276,
+            "bootstrap_reps": 2000,
+            "seed": 42
+          },
+          "recall_at_5": {
+            "mean": 0.4569379327409513,
+            "ci95_low": 0.4265135256616537,
+            "ci95_high": 0.48694590369652985
+          },
+          "mrr_at_5": {
+            "mean": 0.36188063063063064,
+            "ci95_low": 0.33265451096094545,
+            "ci95_high": 0.3888712911985626
+          },
+          "ndcg_at_5": {
+            "mean": 0.3451392038858727,
+            "ci95_low": 0.32052432428734107,
+            "ci95_high": 0.3700198345712617
+          }
+        },
+        "latency_ms": {
+          "p50": 70.83375000001979,
+          "p95": 88.80359999966458,
+          "basis": "model and document encodings cached; query encoding, scoring and sorting"
+        },
+        "paper_count": 276,
+        "model_loading_ms": 999.309800001356,
+        "document_encoding_ms": 2958609.2733000005,
+        "peak_rss_bytes": 1251999744,
+        "model_id": "thenlper/gte-base",
+        "model_revision": "f846641ce4fb595a946b68fe18389798a8da9a64",
+        "spec": {
+          "max_seq_length": 512,
+          "pooling": "mean",
+          "query_prefix": "",
+          "passage_prefix": ""
+        },
+        "checkpoint_id": "413f64fb5b7f9471c4704dedba1c456160b8523d7c1a907a9cc6e9cbf484a25d"
+      }
+    ],
+    "paired_comparisons": [
+      {
+        "model_a": "bm25",
+        "model_b": "supervised-logistic",
+        "metric": "recall_at_5",
+        "mean_difference_a_minus_b": 0.3938646460028039,
+        "ci95_low": 0.3608714809868263,
+        "ci95_high": 0.4297328823025582,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "bm25",
+        "model_b": "supervised-logistic",
+        "metric": "mrr_at_5",
+        "mean_difference_a_minus_b": 0.29356231231231233,
+        "ci95_low": 0.26499854705661796,
+        "ci95_high": 0.322362511294134,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "bm25",
+        "model_b": "supervised-logistic",
+        "metric": "ndcg_at_5",
+        "mean_difference_a_minus_b": 0.2894886981452947,
+        "ci95_low": 0.2637679299176407,
+        "ci95_high": 0.31688321013919,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "bm25",
+        "model_b": "minilm",
+        "metric": "recall_at_5",
+        "mean_difference_a_minus_b": -0.01791038555744438,
+        "ci95_low": -0.051565371611705484,
+        "ci95_high": 0.017266842734769555,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "bm25",
+        "model_b": "minilm",
+        "metric": "mrr_at_5",
+        "mean_difference_a_minus_b": -0.014921171171171171,
+        "ci95_low": -0.0430557309348132,
+        "ci95_high": 0.014686173823426659,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "bm25",
+        "model_b": "minilm",
+        "metric": "ndcg_at_5",
+        "mean_difference_a_minus_b": -0.017065091029210708,
+        "ci95_low": -0.04275366018338583,
+        "ci95_high": 0.010277765078865783,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "bm25",
+        "model_b": "bge-base",
+        "metric": "recall_at_5",
+        "mean_difference_a_minus_b": -0.07782335907335908,
+        "ci95_low": -0.11035727211211194,
+        "ci95_high": -0.04496268095135568,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "bm25",
+        "model_b": "bge-base",
+        "metric": "mrr_at_5",
+        "mean_difference_a_minus_b": -0.09313063063063064,
+        "ci95_low": -0.118887639222654,
+        "ci95_high": -0.0668006092767296,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "bm25",
+        "model_b": "bge-base",
+        "metric": "ndcg_at_5",
+        "mean_difference_a_minus_b": -0.08556499287062307,
+        "ci95_low": -0.1094045379674488,
+        "ci95_high": -0.060720809841597397,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "bm25",
+        "model_b": "e5-base-v2",
+        "metric": "recall_at_5",
+        "mean_difference_a_minus_b": -0.1035565765345177,
+        "ci95_low": -0.13668699844141005,
+        "ci95_high": -0.06958952650061673,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "bm25",
+        "model_b": "e5-base-v2",
+        "metric": "mrr_at_5",
+        "mean_difference_a_minus_b": -0.11525900900900901,
+        "ci95_low": -0.14251767712678548,
+        "ci95_high": -0.0876447644035588,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "bm25",
+        "model_b": "e5-base-v2",
+        "metric": "ndcg_at_5",
+        "mean_difference_a_minus_b": -0.1053661943314983,
+        "ci95_low": -0.12982181677602342,
+        "ci95_high": -0.079491294945832,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "bm25",
+        "model_b": "gte-base",
+        "metric": "recall_at_5",
+        "mean_difference_a_minus_b": -0.01374908139614022,
+        "ci95_low": -0.050145922052779845,
+        "ci95_high": 0.02396609963921841,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "bm25",
+        "model_b": "gte-base",
+        "metric": "mrr_at_5",
+        "mean_difference_a_minus_b": -0.016272522522522523,
+        "ci95_low": -0.044106594401117714,
+        "ci95_high": 0.013064211039051744,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "bm25",
+        "model_b": "gte-base",
+        "metric": "ndcg_at_5",
+        "mean_difference_a_minus_b": -0.016550180730448612,
+        "ci95_low": -0.043368701089657694,
+        "ci95_high": 0.010783192447396445,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "supervised-logistic",
+        "model_b": "minilm",
+        "metric": "recall_at_5",
+        "mean_difference_a_minus_b": -0.41177503156024825,
+        "ci95_low": -0.44303638496911424,
+        "ci95_high": -0.3812567638717528,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "supervised-logistic",
+        "model_b": "minilm",
+        "metric": "mrr_at_5",
+        "mean_difference_a_minus_b": -0.3084834834834835,
+        "ci95_low": -0.33562514815827865,
+        "ci95_high": -0.27964390578249493,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "supervised-logistic",
+        "model_b": "minilm",
+        "metric": "ndcg_at_5",
+        "mean_difference_a_minus_b": -0.30655378917450543,
+        "ci95_low": -0.3307732440244591,
+        "ci95_high": -0.2813500413629637,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "supervised-logistic",
+        "model_b": "bge-base",
+        "metric": "recall_at_5",
+        "mean_difference_a_minus_b": -0.471688005076163,
+        "ci95_low": -0.5030593016059323,
+        "ci95_high": -0.440931029619444,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "supervised-logistic",
+        "model_b": "bge-base",
+        "metric": "mrr_at_5",
+        "mean_difference_a_minus_b": -0.38669294294294293,
+        "ci95_low": -0.416410107770197,
+        "ci95_high": -0.35621391785104073,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "supervised-logistic",
+        "model_b": "bge-base",
+        "metric": "ndcg_at_5",
+        "mean_difference_a_minus_b": -0.3750536910159178,
+        "ci95_low": -0.4004459775288432,
+        "ci95_high": -0.34891367264570383,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "supervised-logistic",
+        "model_b": "e5-base-v2",
+        "metric": "recall_at_5",
+        "mean_difference_a_minus_b": -0.49742122253732163,
+        "ci95_low": -0.5314296847478303,
+        "ci95_high": -0.4634294014469845,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "supervised-logistic",
+        "model_b": "e5-base-v2",
+        "metric": "mrr_at_5",
+        "mean_difference_a_minus_b": -0.4088213213213213,
+        "ci95_low": -0.4388316777048584,
+        "ci95_high": -0.3778404050645912,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "supervised-logistic",
+        "model_b": "e5-base-v2",
+        "metric": "ndcg_at_5",
+        "mean_difference_a_minus_b": -0.394854892476793,
+        "ci95_low": -0.42161184438567645,
+        "ci95_high": -0.36801372363707424,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "supervised-logistic",
+        "model_b": "gte-base",
+        "metric": "recall_at_5",
+        "mean_difference_a_minus_b": -0.40761372739894414,
+        "ci95_low": -0.44117716186935946,
+        "ci95_high": -0.3754952821012206,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "supervised-logistic",
+        "model_b": "gte-base",
+        "metric": "mrr_at_5",
+        "mean_difference_a_minus_b": -0.3098348348348348,
+        "ci95_low": -0.3395507328526118,
+        "ci95_high": -0.2813957816148684,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "supervised-logistic",
+        "model_b": "gte-base",
+        "metric": "ndcg_at_5",
+        "mean_difference_a_minus_b": -0.3060388788757433,
+        "ci95_low": -0.33282386331150887,
+        "ci95_high": -0.2804241278258146,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "minilm",
+        "model_b": "bge-base",
+        "metric": "recall_at_5",
+        "mean_difference_a_minus_b": -0.059912973515914694,
+        "ci95_low": -0.08613230346542053,
+        "ci95_high": -0.033739713336592744,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "minilm",
+        "model_b": "bge-base",
+        "metric": "mrr_at_5",
+        "mean_difference_a_minus_b": -0.07820945945945947,
+        "ci95_low": -0.10242714974250296,
+        "ci95_high": -0.05681514089941047,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "minilm",
+        "model_b": "bge-base",
+        "metric": "ndcg_at_5",
+        "mean_difference_a_minus_b": -0.06849990184141236,
+        "ci95_low": -0.088923633927751,
+        "ci95_high": -0.05003702760579015,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "minilm",
+        "model_b": "e5-base-v2",
+        "metric": "recall_at_5",
+        "mean_difference_a_minus_b": -0.08564619097707334,
+        "ci95_low": -0.11542463635243129,
+        "ci95_high": -0.05681964624346589,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "minilm",
+        "model_b": "e5-base-v2",
+        "metric": "mrr_at_5",
+        "mean_difference_a_minus_b": -0.10033783783783784,
+        "ci95_low": -0.12938160698554796,
+        "ci95_high": -0.07375856734096355,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "minilm",
+        "model_b": "e5-base-v2",
+        "metric": "ndcg_at_5",
+        "mean_difference_a_minus_b": -0.08830110330228759,
+        "ci95_low": -0.11128498748345665,
+        "ci95_high": -0.06586050188985501,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "minilm",
+        "model_b": "gte-base",
+        "metric": "recall_at_5",
+        "mean_difference_a_minus_b": 0.004161304161304161,
+        "ci95_low": -0.02216764288125652,
+        "ci95_high": 0.030814109423761255,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "minilm",
+        "model_b": "gte-base",
+        "metric": "mrr_at_5",
+        "mean_difference_a_minus_b": -0.0013513513513513516,
+        "ci95_low": -0.021179776506683318,
+        "ci95_high": 0.017232158204898675,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "minilm",
+        "model_b": "gte-base",
+        "metric": "ndcg_at_5",
+        "mean_difference_a_minus_b": 0.000514910298762094,
+        "ci95_low": -0.017428681853450936,
+        "ci95_high": 0.01726169420356341,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "bge-base",
+        "model_b": "e5-base-v2",
+        "metric": "recall_at_5",
+        "mean_difference_a_minus_b": -0.025733217461158638,
+        "ci95_low": -0.0525790649065552,
+        "ci95_high": -0.0004306608150063892,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "bge-base",
+        "model_b": "e5-base-v2",
+        "metric": "mrr_at_5",
+        "mean_difference_a_minus_b": -0.022128378378378378,
+        "ci95_low": -0.04603641467097087,
+        "ci95_high": 0.0016634859876840443,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "bge-base",
+        "model_b": "e5-base-v2",
+        "metric": "ndcg_at_5",
+        "mean_difference_a_minus_b": -0.019801201460875224,
+        "ci95_low": -0.0406106397235343,
+        "ci95_high": 0.0006798753331460887,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "bge-base",
+        "model_b": "gte-base",
+        "metric": "recall_at_5",
+        "mean_difference_a_minus_b": 0.06407427767721885,
+        "ci95_low": 0.040764822096807346,
+        "ci95_high": 0.08796051993045888,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "bge-base",
+        "model_b": "gte-base",
+        "metric": "mrr_at_5",
+        "mean_difference_a_minus_b": 0.07685810810810811,
+        "ci95_low": 0.05914614836294944,
+        "ci95_high": 0.09448421422755199,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "bge-base",
+        "model_b": "gte-base",
+        "metric": "ndcg_at_5",
+        "mean_difference_a_minus_b": 0.06901481214017446,
+        "ci95_low": 0.0532641183142964,
+        "ci95_high": 0.0850050096777521,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "e5-base-v2",
+        "model_b": "gte-base",
+        "metric": "recall_at_5",
+        "mean_difference_a_minus_b": 0.08980749513837749,
+        "ci95_low": 0.05901216569282359,
+        "ci95_high": 0.12024626790144521,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "e5-base-v2",
+        "model_b": "gte-base",
+        "metric": "mrr_at_5",
+        "mean_difference_a_minus_b": 0.09898648648648649,
+        "ci95_low": 0.07402700636847351,
+        "ci95_high": 0.12469534499989825,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "e5-base-v2",
+        "model_b": "gte-base",
+        "metric": "ndcg_at_5",
+        "mean_difference_a_minus_b": 0.08881601360104968,
+        "ci95_low": 0.066535009391342,
+        "ci95_high": 0.11104229921703264,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      }
+    ],
+    "neural_recall_at_1_comparisons": [
+      {
+        "model_a": "minilm",
+        "model_b": "bge-base",
+        "metric": "recall_at_1",
+        "mean_difference_a_minus_b": -0.06070132632632633,
+        "ci95_low": -0.08250481816438458,
+        "ci95_high": -0.040162647050494764,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "minilm",
+        "model_b": "e5-base-v2",
+        "metric": "recall_at_1",
+        "mean_difference_a_minus_b": -0.07621322621322621,
+        "ci95_low": -0.10227431896504548,
+        "ci95_high": -0.052320497505605405,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "minilm",
+        "model_b": "gte-base",
+        "metric": "recall_at_1",
+        "mean_difference_a_minus_b": 0.0010103853853853854,
+        "ci95_low": -0.0171994144538107,
+        "ci95_high": 0.018451321564528455,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "bge-base",
+        "model_b": "e5-base-v2",
+        "metric": "recall_at_1",
+        "mean_difference_a_minus_b": -0.015511899886899886,
+        "ci95_low": -0.04006114932975888,
+        "ci95_high": 0.00775453626037338,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "bge-base",
+        "model_b": "gte-base",
+        "metric": "recall_at_1",
+        "mean_difference_a_minus_b": 0.06171171171171171,
+        "ci95_low": 0.04331005584779075,
+        "ci95_high": 0.08081804015589868,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      },
+      {
+        "model_a": "e5-base-v2",
+        "model_b": "gte-base",
+        "metric": "recall_at_1",
+        "mean_difference_a_minus_b": 0.0772236115986116,
+        "ci95_low": 0.05404811480043676,
+        "ci95_high": 0.10170301866785465,
+        "bootstrap_reps": 2000,
+        "paper_clusters": 276,
+        "query_count": 888
+      }
+    ],
+    "test_split_accessed": false
+  },
+  "source_artifacts": {
+    "benchmark": {
+      "path": "artifacts/phase8/full-validation/benchmark_validation.json",
+      "sha256": "09225484a8820ab2b3786b8ee675ec2cbef154d0eeda7f76e60e9b720f08c61a"
+    },
+    "per_query_predictions": {
+      "path": "artifacts/phase8/full-validation/per_query_validation.csv",
+      "sha256": "c33a7028b5ea2536a02b50531fc5070306e4602fb963d61970b492f4d7b7db9d"
+    },
+    "data_audit": {
+      "path": "data/processed/data_audit.json",
+      "sha256": "d2ae72805681e17c8080ad2d7dcf9f815aea55898c758e8b6b695090488f92bd"
+    }
+  }
+}
